@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>자기소개_노은채.exe</title>
+<style>
+@font-face{
+  font-family:'DungGeunMo';
+  src:url('neodgm_code.ttf') format('truetype');
+  font-weight:normal; font-style:normal;
+}
+:root{
+  --bg:#F3C9A8;
+  --console:#F3AFC9;
+  --console-dk:#E48BAF;
+  --line:#8C4A63;
+  --ink:#4A5578;
+  --blue:#CFE3F0;
+  --blue-dk:#8FB6D9;
+  --white:#FFFFFF;
+  --pink:#FBCFE8;
+  --gold:#F3D68A;
+  --bar-a:#FF9BCB;
+  --bar-b:#FF4FA3;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  font-family:'DungGeunMo','Press Start 2P',monospace;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.6;
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpolygon points='4,2 4,23 9,18 13,26 17,24 13,16 21,16' fill='%23F3F1FA' stroke='%234A5578' stroke-width='2'/%3E%3C/svg%3E") 4 2, auto;
+}
+body.no-scroll{overflow:hidden; height:100vh;}
+a,button,.menu-item,.tab,.menu-item2,.skip-btn,.item-slot,.modal-close{
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cpath d='M13 22 C13 22 3 15 3 8 C3 4 6 2 9 2 C11 2 13 4 13 6 C13 4 15 2 17 2 C20 2 23 4 23 8 C23 15 13 22 13 22 Z' fill='%23FBCFE8' stroke='%238C4A63' stroke-width='1.5'/%3E%3C/svg%3E") 13 13, pointer;
+}
+
+/* CRT scanline overlay */
+#crt{
+  position:fixed; inset:0; z-index:999; pointer-events:none;
+  background:repeating-linear-gradient(rgba(140,74,99,0.05) 0px, rgba(140,74,99,0.05) 1px, transparent 1px, transparent 3px);
+  mix-blend-mode:multiply;
+}
+#skyline-bg{
+  position:fixed; inset:0; width:100%; height:100%; z-index:-2;
+  background:url('ground.jpg') center center/cover no-repeat;
+  image-rendering:pixelated;
+}
+
+/* ---------- pixel frame ---------- */
+.pixel-frame{
+  background:var(--white);
+  border:4px solid var(--line);
+  clip-path:polygon(0 10px,10px 10px,10px 0,calc(100% - 10px) 0,calc(100% - 10px) 10px,100% 10px,100% calc(100% - 10px),calc(100% - 10px) calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,10px calc(100% - 10px),0 calc(100% - 10px));
+}
+
+/* ============ BOOT SCREEN ============ */
+#boot{
+  position:fixed; inset:0; z-index:1000;
+  background:transparent;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:22px; overflow:hidden;
+}
+#boot.boot-out{ animation:bootOut .6s ease forwards; }
+@keyframes bootOut{
+  0%{opacity:1; transform:scale(1);}
+  60%{opacity:1; transform:scale(1.04);}
+  100%{opacity:0; transform:scale(1.18);}
+}
+.skip-btn{
+  position:absolute; top:22px; right:26px;
+  background:var(--white); border:3px solid var(--line);
+  padding:7px 14px; font-size:11px; color:var(--ink); font-family:inherit;
+  z-index:5;
+}
+.sparkle{ position:absolute; width:16px; height:16px; opacity:.85; animation:twinkle 2.4s ease-in-out infinite; }
+.sparkle.cross::before,.sparkle.cross::after{ content:''; position:absolute; background:var(--console-dk);}
+.sparkle.cross::before{ width:100%; height:3px; top:50%; left:0; transform:translateY(-50%);}
+.sparkle.cross::after{ width:3px; height:100%; left:50%; top:0; transform:translateX(-50%);}
+.sparkle.diamond{ background:var(--console-dk); transform:rotate(45deg);}
+.sparkle.diamond.hollow{ background:transparent; border:3px solid var(--console-dk);}
+@keyframes twinkle{ 0%,100%{opacity:.3; transform:scale(.7) rotate(var(--r,0deg));} 50%{opacity:1; transform:scale(1.1) rotate(var(--r,0deg));} }
+.s1{ top:12%; left:14%; --r:0deg; animation-delay:0s;}
+.s2{ top:9%; left:20%; width:22px; height:22px; animation-delay:.4s;}
+.s3{ top:28%; left:9%; width:26px; height:26px; animation-delay:1s;}
+.s4{ top:70%; right:11%; width:24px; height:24px; animation-delay:.6s;}
+.s5{ bottom:14%; right:16%; animation-delay:1.3s;}
+.s6{ bottom:10%; right:22%; width:14px; height:14px; animation-delay:1.8s;}
+
+.console-wrap{ perspective:1400px; animation:bob 3.2s ease-in-out infinite; animation-delay:2.2s;}
+@keyframes bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+.console{ width:320px; }
+.lid{
+  transform-style:preserve-3d; transform-origin:bottom center;
+  transform:rotateX(-100deg);
+  animation:openLid 1.1s cubic-bezier(.34,1.56,.64,1) .5s forwards;
+}
+@keyframes openLid{ to{ transform:rotateX(0deg);} }
+.screen-bezel{
+  background:var(--console-dk);
+  border:4px solid var(--line);
+  border-bottom:none;
+  border-radius:16px 16px 4px 4px;
+  padding:16px 14px 10px;
+  position:relative;
+}
+.bezel-dot{ position:absolute; top:8px; width:8px; height:14px; background:var(--pink); border:2px solid var(--line);}
+.bezel-dot.bd-l{ left:10px;}
+.bezel-dot.bd-r{ right:10px;}
+.screen{
+  background:var(--white); border:3px solid var(--line); border-radius:4px;
+  padding:16px 10px; min-height:110px; overflow:hidden;
+}
+.screen-inner{ opacity:0; animation:fadeIn .6s ease forwards; animation-delay:1.6s; }
+@keyframes fadeIn{ to{opacity:1;} }
+.menu-list{ list-style:none; font-size:20px; }
+.menu-item{ padding:6px 4px; color:var(--ink); pointer-events:none; }
+.menu-item.active{ color:var(--console-dk); }
+.menu-item.active::before{ content:''; }
+.boot.ready .menu-item{ pointer-events:auto; }
+.menu-heart{ text-align:right; font-size:14px; color:var(--console-dk); margin-top:4px;}
+
+.hinge{ height:16px; background:var(--console-dk); border-left:4px solid var(--line); border-right:4px solid var(--line); display:flex; align-items:center; justify-content:center;}
+.hinge-btn{ width:26px; height:4px; background:var(--line); }
+
+.base{
+  background:var(--console);
+  border:4px solid var(--line); border-top:none;
+  border-radius:4px 4px 18px 18px;
+  padding:14px 12px 20px;
+  display:flex; align-items:center; gap:8px;
+}
+.speaker-dots{ display:grid; grid-template-columns:repeat(2,6px); grid-template-rows:repeat(3,6px); gap:4px;}
+.speaker-dots span{ width:6px; height:6px; background:var(--line); border-radius:1px; opacity:.6;}
+.dpad{ position:relative; width:42px; height:42px; flex-shrink:0;}
+.dp-v,.dp-h{ position:absolute; background:var(--console-dk); border:2px solid var(--line);}
+.dp-v{ width:14px; height:42px; left:14px; top:0;}
+.dp-h{ width:42px; height:14px; left:0; top:14px;}
+.bottom-screen{
+  flex:1; height:56px; background:linear-gradient(135deg,var(--blue),var(--blue-dk));
+  border:3px solid var(--line); border-radius:4px;
+}
+.abxy{ position:relative; width:42px; height:42px; flex-shrink:0;}
+.abxy i{ position:absolute; width:14px; height:14px; border-radius:50%; background:var(--console-dk); border:2px solid var(--line);}
+.abxy .a{ top:0; left:14px;} .abxy .b{ top:14px; left:28px;} .abxy .x{ top:28px; left:14px;} .abxy .y{ top:14px; left:0;}
+
+.stylus{
+  width:120px; height:12px; background:var(--console);
+  border:3px solid var(--line); border-radius:20px 6px 6px 20px;
+  margin:16px auto 0; transform:rotate(-2deg);
+}
+.boot-hint{ font-size:16px; color:white; text-align:center; opacity:.8;}
+.exit-toast{
+  position:fixed; bottom:40px; left:50%; transform:translate(-50%,20px);
+  background:var(--white); border:3px solid var(--line); padding:10px 18px;
+  font-size:12px; opacity:0; transition:all .25s ease; pointer-events:none;
+}
+.exit-toast.show{ opacity:1; transform:translate(-50%,0); }
+
+/* ============ SITE ============ */
+.site{ opacity:0; pointer-events:none; transition:opacity .7s ease; position:relative; z-index:1; }
+.site.visible{ opacity:1; pointer-events:auto; }
+
+.navbar{
+  position:sticky; top:14px; z-index:20; margin:14px auto 0; max-width:860px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 20px; background:var(--white);
+}
+.nav-logo{ font-size:13px; color:var(--console-dk); }
+.navbar ul{ list-style:none; display:flex; gap:18px; }
+.navbar a{ text-decoration:none; color:var(--ink); font-size:11px; padding-bottom:3px; border-bottom:2px solid transparent; }
+.navbar a:hover{ color:var(--console-dk); }
+.navbar a.active{ color:var(--console-dk); border-bottom-color:var(--console-dk); }
+
+/* ---------- progress bar ---------- */
+.progress-wrap{
+  position:fixed; left:50%; bottom:26px; z-index:50;
+  transform:translateX(-50%);
+  width:calc(100% - 40px); max-width:860px;
+  padding:0 18px;
+}
+.progress-inner{ max-width:860px; margin:0 auto; position:relative; }
+.progress-track{
+  position:relative; height:18px; background:rgba(255,255,255,0.6);
+  border:3px solid var(--line); border-radius:8px; overflow:visible;
+}
+.progress-fill{
+  position:absolute; top:0; left:0; bottom:0; width:25%;
+  border-radius:5px;
+  background:repeating-linear-gradient(45deg,var(--bar-a) 0 8px,var(--bar-b) 8px 16px);
+  box-shadow:0 0 10px rgba(255,79,163,0.55);
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.progress-runner{
+  position:absolute; bottom:100%; left:25%; width:46px;
+  transform:translateX(-50%); margin-bottom:-4px;
+  transition:left .5s cubic-bezier(.4,0,.2,1); pointer-events:none; z-index:2;
+}
+.progress-runner img{ width:250%; display:block; filter:drop-shadow(0 3px 1px rgba(140,74,99,.4)); }
+.progress-label{ font-size:9px; color:var(--bar-b); text-align:right; margin-top:6px; }
+
+.pages{ min-height:60vh; transition:opacity .18s ease, transform .18s ease; }
+.pages.switching{ opacity:0; transform:translateY(6px); }
+.page{ display:none; max-width:860px; margin:0 auto; padding:50px 20px 130px; }
+.page.active{ display:block; animation:pageIn .35s ease; }
+@keyframes pageIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+.section-title{ font-size:16px; color:var(--console-dk); margin-bottom:22px; text-align:center; letter-spacing:1px;}
+
+.dialog{ padding:0; overflow:hidden; }
+.dialog-header{
+  background:var(--console-dk); color:var(--white); text-align:center;
+  padding:12px; font-size:16px; border-bottom:4px solid var(--line);
+}
+.dialog-header.pink-header{ background:var(--console); }
+.status-body{ padding:26px; display:flex; gap:22px; align-items:flex-start; flex-wrap:wrap;}
+.avatar{ width:150px; height:150px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:60px; background:var(--pink); }
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.status-info{ flex:1; min-width:220px; }
+
+.stat-line{ font-size:16px; margin-bottom:8px; }
+.stat-line span{ color:var(--console-dk); margin-left:8px; }
+.typewriter{ font-size:14px; line-height:2; margin-top:14px; min-height:80px; white-space:pre-line; }
+.caret{ animation:blink 1s step-start infinite; color:var(--console-dk); }
+@keyframes blink{ 50%{opacity:0;} }
+
+.item-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:16px; }
+.item-slot{ padding:20px 12px; text-align:center; background:var(--white); border:none; font-family:inherit; transition:transform .15s ease; }
+.item-slot:hover{ transform:translateY(-4px); }
+.item-slot:hover .name{ color:var(--console-dk); }
+.item-slot .emoji{ font-size:28px; display:block; margin-bottom:10px; }
+.item-slot .name{ font-size:11px; margin-bottom:6px; }
+.item-slot .rarity{ font-size:9px; padding:3px 8px; display:inline-block; }
+.rarity.common{ background:var(--pink); color:var(--line); }
+.rarity.rare{ background:var(--blue); color:var(--blue-dk); }
+.rarity.epic{ background:var(--gold); color:#8a6d1a; }
+
+/* ---------- item detail modal ---------- */
+.modal-overlay{
+  position:fixed; inset:0; z-index:200; padding:20px;
+  background:rgba(74,85,120,0.55);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .25s ease;
+}
+.modal-overlay.show{ opacity:1; pointer-events:auto; }
+.modal-box{ position:relative; width:200%; max-width:800px; background:var(--white); overflow:hidden; animation:modalPop .22s ease; }
+@keyframes modalPop{ from{ transform:scale(.92); opacity:0;} to{ transform:scale(1); opacity:1;} }
+.modal-close{
+  position:absolute; top:10px; right:12px; z-index:2;
+  width:26px; height:26px; background:var(--white); border:2px solid var(--line);
+  font-size:12px; color:var(--ink); line-height:1;
+}
+.modal-body{ padding:26px 22px; display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center; }
+.modal-img-group{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+.modal-img{ width:160px; height:160px; flex-shrink:0; overflow:hidden; background:var(--pink); }
+.modal-img img{ width:100%; height:100%; object-fit:cover; }
+.modal-img-group .modal-img{ width:130px; height:130px; }
+.modal-desc{ font-size:12px; line-height:1.9; color:var(--ink); white-space:pre-line; }
+
+.quest-list{ display:flex; flex-direction:column; gap:14px; }
+.quest{ padding:16px 20px; display:flex; align-items:center; gap:14px; }
+.quest .tag{ font-size:9px; padding:4px 8px; flex-shrink:0; }
+.tag.clear{ background:var(--blue); color:var(--blue-dk); }
+.tag.new{ background:var(--gold); color:#8a6d1a; }
+.quest-body{ flex:1; }
+.quest-body h3{ font-size:12px; margin-bottom:6px; }
+.quest-body p{ font-size:10.5px; color:#7a8199; }
+.quest-date{ font-size:9px; color:#a3aac0; margin-top:6px; }
+
+.save-box{ padding:0; overflow:hidden; text-align:center; }
+.save-text{ padding:24px 20px 6px; font-size:18px; }
+.save-actions{ display:flex; flex-direction:column; gap:2px; padding:18px 24px 26px; }
+.menu-item2{
+  text-decoration:none; color:var(--ink); font-size:18px; text-align:left;
+  padding:10px 14px; border:2px solid transparent;
+}
+.menu-item2:hover{ border-color:var(--console-dk); color:var(--console-dk); background:var(--pink); }
+
+footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px; }
+
+@media(max-width:640px){
+  .navbar{ flex-direction:column; gap:10px; }
+  .console{ width:260px; }
+}
+</style>
+</head>
+<body class="no-scroll">
+<div id="skyline-bg"></div>
+<div id="crt"></div>
+
+<div id="boot">
+  <button class="skip-btn" id="skipBtn">SKIP ▶</button>
+  <div class="sparkle cross s1"></div>
+  <div class="sparkle diamond hollow s2"></div>
+  <div class="sparkle diamond s3"></div>
+  <div class="sparkle diamond hollow s4"></div>
+  <div class="sparkle cross s5"></div>
+  <div class="sparkle diamond s6"></div>
+
+  <div class="console-wrap">
+    <div class="console">
+      <div class="lid">
+        <div class="screen-bezel">
+          <span class="bezel-dot bd-l"></span>
+          <span class="bezel-dot bd-r"></span>
+          <div class="screen">
+            <div class="screen-inner">
+              <ul class="menu-list" id="menuList">
+                <li class="menu-item active" data-action="start">▸ START</li>
+                <li class="menu-item" data-action="exit">▸ EXIT</li>
+              </ul>
+              <div class="menu-heart">♡</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hinge"><span class="hinge-btn"></span></div>
+      <div class="base">
+        <div class="speaker-dots"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="dpad"><div class="dp-v"></div><div class="dp-h"></div></div>
+        <div class="bottom-screen"></div>
+        <div class="abxy"><i class="a"></i><i class="b"></i><i class="x"></i><i class="y"></i></div>
+        <div class="speaker-dots"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+    </div>
+    <div class="stylus"></div>
+  </div>
+  <p class="boot-hint" id="bootHint">OPENING...</p>
+  <div class="exit-toast" id="exitToast">🚫 잠깐! 저희 더 알아가요..</div>
+</div>
+
+<div class="site" id="site">
+  <nav class="pixel-frame navbar">
+    <div class="nav-logo">자기소개</div>
+    <ul>
+      <li><a href="#status" data-page="status" class="active">기본소개</a></li>
+      <li><a href="#items" data-page="items">앨범</a></li>
+      <li><a href="#quests" data-page="quests">플레이리스트</a></li>
+      <li><a href="#save" data-page="save">마무리</a></li>
+    </ul>
+  </nav>
+
+  <div class="progress-wrap">
+    <div class="progress-inner">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+        <div class="progress-runner" id="progressRunner"><img src="run_character.png" alt="달리는 캐릭터"></div>
+      </div>
+      <div class="progress-label" id="progressLabel">1 / 4</div>
+    </div>
+  </div>
+
+  <div class="pages" id="pages">
+  <section id="status" class="page active">
+    <div class="pixel-frame dialog">
+      <div class="dialog-header">◆ 기본소개 ◆</div>
+      <div class="status-body">
+        <div class="avatar pixel-frame"><img src = "proflie_image.jpg" alt="노은채"></div>
+        <div class="status-info">
+          <p class="stat-line">이름: <span>노은채</span></p>
+          <p class="stat-line">생년월일: <span>2004.03.20(23살)</span></p>
+          <p class="stat-line">전공: <span>단국대학교 소프트웨어학과 3학년 재학</span></p>
+          <div class="typewriter" id="introText"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="items" class="page">
+    <h2 class="section-title">◆ 앨범📷 ◆</h2>
+    <div class="item-grid">
+      <button type="button" class="item-slot pixel-frame" data-key="childhood">
+        <span class="emoji">🎨</span>
+        <div class="name">어린시절</div>
+      </button>
+      <button type="button" class="item-slot pixel-frame" data-key="hobby">
+        <span class="emoji">🎧</span>
+        <div class="name">취미</div>
+      </button>
+      <button type="button" class="item-slot pixel-frame" data-key="travel">
+        <span class="emoji">✈️</span>
+        <div class="name">여행</div>
+      </button>
+      <button type="button" class="item-slot pixel-frame" data-key="motto">
+        <span class="emoji">🌱</span>
+        <div class="name">좌우명</div>
+      </button>
+      <button type="button" class="item-slot pixel-frame" data-key="dream">
+        <span class="emoji">📚</span>
+        <div class="name">꿈</div>
+      </button>
+    </div>
+  </section>
+
+  <section id="quests" class="page">
+    <h2 class="section-title">◆ 플레이리스트 ◆</h2>
+    <div class="quest-list">
+      <div class="quest pixel-frame">
+        <span class="tag clear">CLEAR</span>
+        <div class="quest-body">
+          <h3>필름 카메라로 담은 여름</h3>
+          <p>더위 속에서 찾은 소소한 풍경들을 기록했어요.</p>
+          <div class="quest-date">진행일 · 2026.07.28</div>
+        </div>
+      </div>
+      <div class="quest pixel-frame">
+        <span class="tag clear">CLEAR</span>
+        <div class="quest-body">
+          <h3>초보자의 식물 키우기 일기</h3>
+          <p>몬스테라가 새 잎을 낸 날의 기록.</p>
+          <div class="quest-date">진행일 · 2026.07.15</div>
+        </div>
+      </div>
+      <div class="quest pixel-frame">
+        <span class="tag new">NEW</span>
+        <div class="quest-body">
+          <h3>이번 달 읽은 책 세 권</h3>
+          <p>여름에 어울리는 에세이 추천 목록.</p>
+          <div class="quest-date">진행일 · 2026.06.30</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="save" class="page">
+    <div class="pixel-frame save-box">
+      <div class="dialog-header pink-header">마무리</div>
+      <p class="save-text">읽어주셔서 감사합니다</p>
+      <div class="save-actions">
+        <a class="menu-item2">▸ ♥ EMAIL: eunchaeno88@gmail.com</a>
+        <a class="menu-item2">▸ ♥ INSTAGRAM: noeun._.chae</a>
+        <a class="menu-item2">▸ ♥ GITHUB: nohnoh</a>
+      </div>
+    </div>
+  </section>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="itemModal">
+  <div class="pixel-frame modal-box">
+    <button type="button" class="modal-close" id="modalClose">✕</button>
+    <div class="dialog-header" id="modalHeader">◆ 제목 ◆</div>
+    <div class="modal-body">
+      <div class="modal-img-group" id="modalImgGroup"></div>
+      <p class="modal-desc" id="modalDesc"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var boot = document.getElementById('boot');
+  var site = document.getElementById('site');
+  var menuItems = Array.prototype.slice.call(document.querySelectorAll('.menu-item'));
+  var bootHint = document.getElementById('bootHint');
+  var exitToast = document.getElementById('exitToast');
+  var skipBtn = document.getElementById('skipBtn');
+  var activeIndex = 0;
+  var ready = false;
+  var launched = false;
+
+  function setActive(i){
+    menuItems.forEach(function(m){ m.classList.remove('active'); });
+    menuItems[i].classList.add('active');
+    activeIndex = i;
+  }
+
+  function showExitToast(){
+    exitToast.classList.add('show');
+    setTimeout(function(){ exitToast.classList.remove('show'); }, 1400);
+  }
+
+  function startSite(){
+    if(launched) return;
+    launched = true;
+    boot.classList.add('boot-out');
+    setTimeout(function(){
+      boot.style.display = 'none';
+      document.body.classList.remove('no-scroll');
+      site.classList.add('visible');
+      typeIntro();
+      updateProgress('status');
+    }, 620);
+  }
+
+  menuItems.forEach(function(item, i){
+    item.addEventListener('click', function(){
+      if(!ready) return;
+      if(item.getAttribute('data-action') === 'exit'){ showExitToast(); return; }
+      setActive(i);
+      startSite();
+    });
+    item.addEventListener('mouseenter', function(){ if(ready) setActive(i); });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(!ready || launched) return;
+    if(e.key === 'ArrowDown'){ setActive((activeIndex+1) % menuItems.length); e.preventDefault(); }
+    else if(e.key === 'ArrowUp'){ setActive((activeIndex-1+menuItems.length) % menuItems.length); e.preventDefault(); }
+    else if(e.key === 'Enter'){
+      var item = menuItems[activeIndex];
+      if(item.getAttribute('data-action') === 'exit'){ showExitToast(); } else { startSite(); }
+    }
+  });
+
+  skipBtn.addEventListener('click', startSite);
+
+  // ---- page routing: nav click -> show only that page ----
+  var pagesEl = document.getElementById('pages');
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.navbar a'));
+  var pageEls = Array.prototype.slice.call(document.querySelectorAll('.page'));
+
+  // ---- progress bar: fills + runner moves as pages advance ----
+  var pageOrder = ['status','items','quests','save'];
+  var progressFill = document.getElementById('progressFill');
+  var progressRunner = document.getElementById('progressRunner');
+  var progressLabel = document.getElementById('progressLabel');
+
+  function updateProgress(id){
+    var idx = pageOrder.indexOf(id);
+    if(idx === -1) return;
+    var fillPct = ((idx + 1) / pageOrder.length) * 100;
+    var runnerPct = Math.min(96, Math.max(6, fillPct - 4));
+    progressFill.style.width = fillPct + '%';
+    progressRunner.style.left = runnerPct + '%';
+    progressLabel.textContent = (idx + 1) + ' / ' + pageOrder.length;
+  }
+
+  function showPage(id){
+    var current = document.querySelector('.page.active');
+    if(current && current.id === id) return;
+    pagesEl.classList.add('switching');
+    setTimeout(function(){
+      pageEls.forEach(function(p){ p.classList.remove('active'); });
+      var target = document.getElementById(id);
+      if(target) target.classList.add('active');
+      navLinks.forEach(function(a){ a.classList.toggle('active', a.getAttribute('data-page') === id); });
+      pagesEl.classList.remove('switching');
+      window.scrollTo(0,0);
+      updateProgress(id);
+      if(id === 'status') typeIntro();
+    }, 180);
+  }
+
+  navLinks.forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      showPage(a.getAttribute('data-page'));
+    });
+  });
+
+  setTimeout(function(){
+    ready = true;
+    boot.classList.add('ready');
+    bootHint.textContent = '↑ ↓ 로 선택 · ENTER 로 시작';
+  }, 2100);
+
+  function typeIntro(){
+    var el = document.getElementById('introText');
+    if(!el || el.getAttribute('data-typed')) return;
+    el.setAttribute('data-typed','1');
+    var text = "안녕하세요 남은 시간 동안 같이 많은 것을 배워가는 시간이었으면 좋겠습니다. \n모두 좋은 하루 보내시길 바라겠습니다. 잘 부탁드립니다!";
+    var i = 0;
+    var caret = document.createElement('span');
+    caret.className = 'caret';
+    caret.textContent = '▌';
+    el.appendChild(caret);
+    function step(){
+      if(i < text.length){
+        caret.insertAdjacentText('beforebegin', text[i]);
+        i++;
+        setTimeout(step, 70);
+      }
+    }
+    step();
+  }
+
+  // ---- item detail modal ----
+  var itemsData = {
+    childhood: { title:'◆ 어린시절 ◆', imgs:['child.jpg','child2.jpg'], desc:'다들 전라북도 군산을 아실까요? 저는 군산에서 태어나 20살 전까지 군산에서 쭉 살았답니다. \n 군산에는 짬뽕맛집과 예쁜카페가 많은거 같아요!' },
+    hobby:     { title:'◆ 취미 ◆',     imgs:['hobby.jpg'], desc:'전 추리물을 아주아주 좋아한답니다. 추리소설 읽는 것도 좋아하고 미스테리사건들도 좋아해요. \n 요즘은 데스노트를 정주행하고 있어요! 너무 유명한 애니메이션이지만 안 보셨다면 추천합니다.. 명작이에유..' },
+    travel:    { title:'◆ 여행 ◆',     imgs:['japan.jpg','japan2.jpg'], desc:'여행을 많이 가보지는 않았지만 일본을 제일 많이 가보고 제일 좋아하는 거 같아요. \n 사진은 도쿄의 우에노공원과 시부야스카이에서 찍은 사진들이에요' },
+    motto:     { title:'◆ 좌우명 ◆',   imgs:['ment.jpg'], desc:'저는 \'현재는 과거의 결과이자 미래의 원인이다\'라는 말을 좋아해요. 항상 현재를 최선을 다해 살아가려 노력합니다!' },
+    dream:     { title:'◆ 꿈 ◆',       imgs:['dream.jpg'], desc:'전 보안분야에 관심이 있어요. 그래서 요즘은 포렌식 공부를 하고 있습니다. 너무 어렵네여..' }
+  };
+  var itemModal = document.getElementById('itemModal');
+  var modalHeader = document.getElementById('modalHeader');
+  var modalImgGroup = document.getElementById('modalImgGroup');
+  var modalDesc = document.getElementById('modalDesc');
+  var modalClose = document.getElementById('modalClose');
+
+  function openModal(key){
+    var data = itemsData[key];
+    if(!data) return;
+    modalHeader.textContent = data.title;
+    modalImgGroup.innerHTML = '';
+    data.imgs.forEach(function(src){
+      var box = document.createElement('div');
+      box.className = 'modal-img pixel-frame';
+      var img = document.createElement('img');
+      img.src = src;
+      img.alt = data.title;
+      box.appendChild(img);
+      modalImgGroup.appendChild(box);
+    });
+    modalDesc.textContent = data.desc;
+    itemModal.classList.add('show');
+  }
+  function closeModal(){ itemModal.classList.remove('show'); }
+
+  Array.prototype.slice.call(document.querySelectorAll('.item-slot')).forEach(function(slot){
+    slot.addEventListener('click', function(){ openModal(slot.getAttribute('data-key')); });
+  });
+  modalClose.addEventListener('click', closeModal);
+  itemModal.addEventListener('click', function(e){ if(e.target === itemModal) closeModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+})();
+</script>
+</body>
+</html>
