@@ -319,6 +319,29 @@ a,button,.menu-item,.tab,.menu-item2,.skip-btn,.item-slot,.modal-close{
 }
 .menu-item2:hover{ border-color:var(--console-dk); color:var(--console-dk); background:var(--pink); }
 
+/* ---------- guestbook ---------- */
+.guestbook-form{ max-width:460px; margin:0 auto 28px; padding:0; overflow:hidden; }
+.guestbook-form-body{ padding:20px 22px 24px; display:flex; flex-direction:column; gap:10px; }
+.guestbook-input{
+  font-family:inherit; font-size:12px; padding:10px 12px;
+  border:3px solid var(--line); background:var(--white); color:var(--ink);
+  width:100%;
+}
+.guestbook-textarea{ resize:vertical; min-height:70px; line-height:1.6; }
+.guestbook-submit{
+  font-family:inherit; font-size:12px; padding:10px 22px;
+  background:var(--console-dk); color:var(--white); border:3px solid var(--line);
+  align-self:center;
+}
+.guestbook-list{ max-width:460px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
+.guestbook-entry{ padding:14px 16px; }
+.guestbook-entry-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+.guestbook-name{ font-size:12px; color:var(--console-dk); }
+.guestbook-date{ font-size:8px; color:#a3aac0; }
+.guestbook-message{ font-size:11px; line-height:1.7; color:var(--ink); white-space:pre-line; word-break:break-word; }
+.guestbook-empty{ text-align:center; font-size:11px; color:#a3aac0; padding:20px; }
+.guestbook-status{ text-align:center; font-size:10px; color:var(--console-dk); min-height:14px; margin-top:-2px; margin-bottom:14px; }
+
 footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px; }
 
 @media(max-width:640px){
@@ -385,6 +408,7 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
       <li><a href="#status" data-page="status" class="active">프로필</a></li>
       <li><a href="#items" data-page="items">앨범</a></li>
       <li><a href="#quests" data-page="quests">플레이리스트</a></li>
+      <li><a href="#guestbook" data-page="guestbook">방명록</a></li>
       <li><a href="#save" data-page="save">마무리</a></li>
     </ul>
   </nav>
@@ -469,6 +493,20 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
         <span>🔊</span>
       </div>
     </div>
+  </section>
+
+  <section id="guestbook" class="page">
+    <h2 class="section-title">◆ 방명록 ◆</h2>
+    <div class="pixel-frame guestbook-form">
+      <div class="dialog-header pink-header">✎ 메시지 남기기</div>
+      <div class="guestbook-form-body">
+        <input type="text" id="gbName" class="guestbook-input" placeholder="이름 (또는 별명)" maxlength="20">
+        <textarea id="gbMessage" class="guestbook-input guestbook-textarea" placeholder="남기고 싶은 말을 적어주세요!" maxlength="300"></textarea>
+        <button type="button" class="guestbook-submit" id="gbSubmit">방명록 남기기 ▸</button>
+      </div>
+    </div>
+    <p class="guestbook-status" id="gbStatus"></p>
+    <div class="guestbook-list" id="gbList"></div>
   </section>
 
   <section id="save" class="page">
@@ -640,7 +678,7 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
   var pageEls = Array.prototype.slice.call(document.querySelectorAll('.page'));
 
   // ---- progress bar: fills + runner moves as pages advance ----
-  var pageOrder = ['status','items','quests','save'];
+  var pageOrder = ['status','items','quests','guestbook','save'];
   var progressFill = document.getElementById('progressFill');
   var progressRunner = document.getElementById('progressRunner');
   var progressLabel = document.getElementById('progressLabel');
@@ -672,6 +710,7 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
       window.scrollTo(0,0);
       updateProgress(id);
       if(id === 'status') typeIntro();
+      if(id === 'guestbook') fetchGuestbook();
     }, 180);
   }
 
@@ -855,6 +894,108 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
   });
 
   updatePlayerDisplay('loved');
+
+  // ---- guestbook (Supabase) ----
+  var SUPABASE_URL = 'https://gzulwhjnzlbeidxhuctm.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWx3aGpuemxiZWlkeGh1Y3RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5MjU5MjEsImV4cCI6MjEwMTUwMTkyMX0.7SWG6L9j2iihvwtF58j6GeGpIe_vkSZkJLueEeMuRtw';
+  var GUESTBOOK_ENDPOINT = SUPABASE_URL + '/rest/v1/guestbook';
+  var gbName = document.getElementById('gbName');
+  var gbMessage = document.getElementById('gbMessage');
+  var gbSubmit = document.getElementById('gbSubmit');
+  var gbStatus = document.getElementById('gbStatus');
+  var gbList = document.getElementById('gbList');
+  var gbLoaded = false;
+
+  function gbFormatDate(iso){
+    var d = new Date(iso);
+    var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+    var dd = ('0' + d.getDate()).slice(-2);
+    return d.getFullYear() + '.' + mm + '.' + dd;
+  }
+
+  function renderGuestbook(entries){
+    gbList.innerHTML = '';
+    if(!entries || entries.length === 0){
+      var empty = document.createElement('p');
+      empty.className = 'guestbook-empty';
+      empty.textContent = '아직 방명록이 없어요. 첫 메시지를 남겨주세요!';
+      gbList.appendChild(empty);
+      return;
+    }
+    entries.forEach(function(entry){
+      var box = document.createElement('div');
+      box.className = 'pixel-frame guestbook-entry';
+
+      var head = document.createElement('div');
+      head.className = 'guestbook-entry-head';
+      var name = document.createElement('span');
+      name.className = 'guestbook-name';
+      name.textContent = entry.name;
+      var date = document.createElement('span');
+      date.className = 'guestbook-date';
+      date.textContent = gbFormatDate(entry.created_at);
+      head.appendChild(name);
+      head.appendChild(date);
+
+      var msg = document.createElement('p');
+      msg.className = 'guestbook-message';
+      msg.textContent = entry.message;
+
+      box.appendChild(head);
+      box.appendChild(msg);
+      gbList.appendChild(box);
+    });
+  }
+
+  function fetchGuestbook(){
+    if(gbLoaded) return;
+    gbLoaded = true;
+    fetch(GUESTBOOK_ENDPOINT + '?select=name,message,created_at&order=created_at.desc&limit=50', {
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+    })
+      .then(function(res){ if(!res.ok) throw new Error('fetch failed'); return res.json(); })
+      .then(renderGuestbook)
+      .catch(function(){
+        gbLoaded = false;
+        gbList.innerHTML = '<p class="guestbook-empty">방명록을 불러오지 못했어요. 새로고침 해주세요.</p>';
+      });
+  }
+
+  gbSubmit.addEventListener('click', function(){
+    var name = gbName.value.trim();
+    var message = gbMessage.value.trim();
+    if(!name){ gbName.focus(); return; }
+    if(!message){ gbMessage.focus(); return; }
+
+    gbSubmit.disabled = true;
+    gbStatus.textContent = '등록 중...';
+
+    fetch(GUESTBOOK_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation'
+      },
+      body: JSON.stringify({ name: name, message: message })
+    })
+      .then(function(res){ if(!res.ok) throw new Error('insert failed'); return res.json(); })
+      .then(function(){
+        gbName.value = '';
+        gbMessage.value = '';
+        gbStatus.textContent = '남겨주셔서 감사해요! 💌';
+        gbLoaded = false;
+        fetchGuestbook();
+        setTimeout(function(){ gbStatus.textContent = ''; }, 2500);
+      })
+      .catch(function(){
+        gbStatus.textContent = '등록에 실패했어요. 잠시 후 다시 시도해주세요.';
+      })
+      .then(function(){
+        gbSubmit.disabled = false;
+      });
+  });
 })();
 </script>
 </body>
