@@ -241,7 +241,7 @@ a,button,.menu-item,.tab,.menu-item2,.skip-btn,.item-slot,.modal-close{
 .caret{ animation:blink 1s step-start infinite; color:var(--console-dk); }
 @keyframes blink{ 50%{opacity:0;} }
 
-.item-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:16px; }
+.item-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; max-width:460px; margin:0 auto; }
 .item-slot{ padding:20px 12px; text-align:center; background:var(--white); border:none; font-family:inherit; transition:transform .15s ease; }
 .item-slot:hover{ transform:translateY(-4px); }
 .item-slot:hover .name{ color:var(--console-dk); }
@@ -269,9 +269,9 @@ a,button,.menu-item,.tab,.menu-item2,.skip-btn,.item-slot,.modal-close{
 }
 .modal-body{ padding:26px 22px; display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center; }
 .modal-img-group{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-.modal-img{ width:160px; height:160px; flex-shrink:0; overflow:hidden; background:var(--pink); }
+.modal-img{ width:220px; height:220px; flex-shrink:0; overflow:hidden; background:var(--pink); }
 .modal-img img{ width:100%; height:100%; object-fit:cover; }
-.modal-img-group .modal-img{ width:130px; height:130px; }
+.modal-img-group .modal-img{ width:220px; height:220px; }
 .modal-desc{ font-size:12px; line-height:1.9; color:var(--ink); white-space:pre-line; }
 
 /* ---------- bgm notice ---------- */
@@ -484,10 +484,10 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
 
 <div class="modal-overlay" id="bgmNotice">
   <div class="pixel-frame modal-box">
-    <div class="dialog-header pink-header">🎵 BGM ON</div>
+    <div class="dialog-header pink-header">🎵 BGM ON 🎵</div>
     <div class="modal-body notice-body">
-      <p class="notice-text">이 사이트엔 배경음악이 깔려있어요!<br>함께 즐겨주시면 좋겠어요 🎶</p>
-      <button type="button" class="notice-ok-btn" id="bgmNoticeOk">확인했어요!</button>
+      <p class="notice-text">이 사이트엔 배경음악이 깔려있어요!<br>함께 즐겨주시면 좋겠습니다.</p>
+      <button type="button" class="notice-ok-btn" id="bgmNoticeOk">확인했어요</button>
     </div>
   </div>
 </div>
@@ -726,11 +726,11 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
 
   // ---- item detail modal ----
   var itemsData = {
-    childhood: { title:'◆ 어린시절 ◆', imgs:['child.jpg','child2.jpg'], desc:'다들 전라북도 군산을 아실까요? 저는 군산에서 태어나 20살 전까지 군산에서 쭉 살았답니다. \n 군산에는 짬뽕맛집과 예쁜카페가 많은거 같아요!' },
-    hobby:     { title:'◆ 취미 ◆',     imgs:['hobby.jpg'], desc:'전 추리물을 아주아주 좋아한답니다. 추리소설 읽는 것도 좋아하고 미스테리사건들도 좋아해요. \n 요즘은 데스노트를 정주행하고 있어요! 너무 유명한 애니메이션이지만 안 보셨다면 추천합니다.. 명작이에유..' },
-    travel:    { title:'◆ 여행 ◆',     imgs:['japan.jpg','japan2.jpg'], desc:'여행을 많이 가보지는 않았지만 일본을 제일 많이 가보고 제일 좋아하는 거 같아요. \n 사진은 도쿄의 우에노공원과 시부야스카이에서 찍은 사진들이에요' },
-    motto:     { title:'◆ 좌우명 ◆',   imgs:['ment.jpg'], desc:'저는 \'현재는 과거의 결과이자 미래의 원인이다\'라는 말을 좋아해요. 항상 현재를 최선을 다해 살아가려 노력합니다!' },
-    dream:     { title:'◆ 꿈 ◆',       imgs:['dream.jpg'], desc:'전 보안분야에 관심이 있어요. 그래서 요즘은 포렌식 공부를 하고 있습니다. 너무 어렵네여..' }
+    childhood: { title:'◆ 어린시절 ◆', imgs:['child.jpg','child2.jpg'], desc:'안녕하세요😊 다들 전라북도 군산을 아실까요? \n 저는 군산에서 태어나 20살 전까지 쭉 그곳에서 자랐습니다. 군산은 바다와 가까워 여유로운 분위기가 매력적인 도시이고, 짬뽕 맛집과 감성적인 카페들이 많아 소소한 즐거움을 느끼기 좋은 곳이라고 생각합니다. 이러한 환경 속에서 자라며 차분하고 편안한 성격을 자연스럽게 가지게 된 것 같아요.' },
+    hobby:     { title:'◆ 취미 ◆',     imgs:['hobby.jpg'], desc:'저는 추리물을 좋아해요. “왜 이런 일이 일어났을까?”를 고민해보고 추리하는 과정을 즐깁니다. 추리소설을 읽으며 논리적으로 사고하는 힘을 기를 수 있었고, 미스터리 사건들을 찾아보면서 다양한 관점에서 생각하는 습관도 가지게 된 것 같아요. \n최근에는 애니메이션 \‘데스노트\’를 정주행하고 있는데, 긴장감 넘치는 전개와 심리전이 아주 재미있는 애니메이션입니다. 안 보셨다면 강력 추천드려요!\n소설로는 히가시노 게이고의 용의자x의 헌신 추천드립니다!' },
+    travel:    { title:'◆ 여행 ◆',     imgs:['japan.jpg','japan2.jpg'], desc:'여행을 많이 다녀보진 않았지만, 그중에서도 일본을 가장 많이 방문했고 가장 좋아하는 나라입니다. 일본 특유의 아기자기한 감성과 일본 음식이 입맛에 잘 맞아서 그런 것 같아요 사진은 각각 도쿄의 우에노공원과 시부야스카이에서 찍은 사진이에요. \n여행을 통해 새로운 환경을 경험하는 것이 저에게는 큰 자극이 되고, 더 넓은 시야를 갖게 해준다고 생각합니다.' },
+    motto:     { title:'◆ 좌우명 ◆',   imgs:['ment.jpg'], desc:'제가 좋아하는 좌우명은 “현재는 과거의 결과이자 미래의 원인이다”입니다. \n지금 이 순간을 어떻게 보내느냐에 따라 미래가 달라진다고 생각해서, 하루하루를 최대한 열심히 보내려고 노력하고 있어요. \n가끔 힘들 때도 있지만, 그 시간도 다 의미 있다고 생각하면서 긍정적으로 버티고 있습니다!' },
+    dream:     { title:'◆ 꿈 ◆',       imgs:['dream.jpg'], desc:'앞으로의 꿈은 보안 분야에서 일하는 거예요. 특히 디지털 포렌식에 관심이 있어서 요즘 열심히 공부하고 있는데… 솔직히 말하면 아직은 너무 어렵네요 😂 \n그래도 포기하지 않고 꾸준히 해보려고 합니다! 나중에는 꼭 실력 있는 보안 전문가가 되고 싶습니다.' }
   };
   var itemModal = document.getElementById('itemModal');
   var modalHeader = document.getElementById('modalHeader');
