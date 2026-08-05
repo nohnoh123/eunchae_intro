@@ -304,6 +304,7 @@ a,button,.menu-item,.tab,.menu-item2,.skip-btn,.item-slot,.modal-close{
 .player-progress{ height:5px; background:rgba(255,255,255,0.4); margin-bottom:16px; }
 .player-progress-fill{ width:38%; height:100%; background:var(--white); }
 .player-controls{ display:flex; align-items:center; justify-content:center; gap:22px; font-size:18px; color:var(--white); margin-bottom:16px; }
+.player-ctrl-btn{ background:none; border:none; color:inherit; font-size:inherit; font-family:inherit; padding:4px; line-height:1; }
 .player-controls .play{ font-size:22px; }
 .player-volume{ display:flex; align-items:center; gap:8px; font-size:11px; }
 .player-volume-bar{ flex:1; height:4px; background:rgba(255,255,255,0.4); }
@@ -333,6 +334,7 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
 <div id="crt"></div>
 <audio id="bgm" src="BGM2.mp3" loop preload="none"></audio>
 <audio id="typeSfx" src="keyboard.mp3" loop preload="none"></audio>
+<audio id="playerAudio" preload="none"></audio>
 <button type="button" class="bgm-btn" id="bgmBtn" aria-label="배경음악 켜기/끄기">🔊</button>
 
 <div id="boot">
@@ -455,9 +457,11 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
         <p class="player-artist" id="playerArtist"></p>
         <p class="player-comment" id="playerComment"></p>
       </div>
-      <div class="player-progress"><div class="player-progress-fill"></div></div>
+      <div class="player-progress"><div class="player-progress-fill" id="playerProgressFill"></div></div>
       <div class="player-controls">
-        <span>⏮</span><span class="play">⏸</span><span>⏭</span>
+        <button type="button" class="player-ctrl-btn" id="playerPrev">⏮</button>
+        <button type="button" class="player-ctrl-btn play" id="playerPlay">▶</button>
+        <button type="button" class="player-ctrl-btn" id="playerNext">⏭</button>
       </div>
       <div class="player-volume">
         <span>🔈</span>
@@ -654,6 +658,10 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
   function showPage(id){
     var current = document.querySelector('.page.active');
     if(current && current.id === id) return;
+    if(current && current.id === 'quests' && id !== 'quests'){
+      playerAudio.pause();
+      playBgm();
+    }
     pagesEl.classList.add('switching');
     setTimeout(function(){
       pageEls.forEach(function(p){ p.classList.remove('active'); });
@@ -766,21 +774,29 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
 
   // ---- playlist player ----
   var songsData = {
-    loved: { tag:'최애곡',   title:'아직 거기 살아', artist:'데이식스', comment:'몇 번을 들어도 질리지 않는 최애곡.', cover:'song3.jpg' },
-    top:   { tag:'최근 제일 많이 들은 곡', title:'사랑이라 했던 말 속에서', artist:'캔트비블루', comment:'요즘 가장 많이 듣는 노래.', cover:'song1.jpg' },
-    walk:  { tag:'산책곡',   title:'Bubble Gum', artist:'뉴진스', comment:'새벽산책하면서 듣기 좋은 곡', cover:'song4.png' },
-    work:  { tag:'노동요',   title:'REDRED', artist:'코르티스', comment:'일할 때 텐션 올려주는 노동요.', cover:'song2.jpg' }
+    loved: { tag:'최애곡',   title:'아직 거기 살아', artist:'데이식스', comment:'몇 번을 들어도 질리지 않는 최애곡.', cover:'song3.jpg', audio:'song3.mp3' },
+    top:   { tag:'최근 제일 많이 들은 곡', title:'사랑이라 했던 말 속에서', artist:'캔트비블루', comment:'요즘 가장 많이 듣는 노래.', cover:'song1.jpg', audio:'song1.mp3', fromStart:true },
+    walk:  { tag:'산책곡',   title:'Bubble Gum', artist:'뉴진스', comment:'새벽산책하면서 듣기 좋은 곡', cover:'song4.png', audio:'song4.mp3' },
+    work:  { tag:'노동요',   title:'REDRED', artist:'코르티스', comment:'일할 때 텐션 올려주는 노동요.', cover:'song2.jpg', audio:'song2.mp3' }
   };
+  var songOrder = ['loved', 'top', 'walk', 'work'];
+  var currentSongKey = null;
   var playlistTabs = Array.prototype.slice.call(document.querySelectorAll('.playlist-tab-btn'));
   var playerCover = document.getElementById('playerCover');
   var playerTag = document.getElementById('playerTag');
   var playerTitle = document.getElementById('playerTitle');
   var playerArtist = document.getElementById('playerArtist');
   var playerComment = document.getElementById('playerComment');
+  var playerAudio = document.getElementById('playerAudio');
+  var playerPlay = document.getElementById('playerPlay');
+  var playerPrev = document.getElementById('playerPrev');
+  var playerNext = document.getElementById('playerNext');
+  var playerProgressFill = document.getElementById('playerProgressFill');
 
-  function renderSong(key){
+  function updatePlayerDisplay(key){
     var data = songsData[key];
     if(!data) return;
+    currentSongKey = key;
     playlistTabs.forEach(function(btn){ btn.classList.toggle('active', btn.getAttribute('data-song') === key); });
     playerCover.src = data.cover;
     playerCover.alt = data.title + ' 앨범커버';
@@ -788,13 +804,56 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
     playerTitle.textContent = data.title;
     playerArtist.textContent = data.artist;
     playerComment.textContent = data.comment;
+    playerProgressFill.style.width = '0%';
+  }
+
+  function startFromMiddle(){
+    var data = songsData[currentSongKey];
+    if(!data || !data.fromStart){
+      playerAudio.currentTime = playerAudio.duration / 2;
+    }
+    playerAudio.play().catch(function(){});
+  }
+
+  function playSong(key){
+    var data = songsData[key];
+    if(!data) return;
+    updatePlayerDisplay(key);
+    if(!bgm.paused){ bgm.pause(); }
+    playerAudio.removeEventListener('loadedmetadata', startFromMiddle);
+    playerAudio.src = data.audio;
+    playerAudio.addEventListener('loadedmetadata', startFromMiddle, { once: true });
+    playerAudio.load();
+  }
+
+  function stepSong(delta){
+    var idx = songOrder.indexOf(currentSongKey);
+    var next = songOrder[(idx + delta + songOrder.length) % songOrder.length];
+    playSong(next);
   }
 
   playlistTabs.forEach(function(btn){
-    btn.addEventListener('click', function(){ renderSong(btn.getAttribute('data-song')); });
+    btn.addEventListener('click', function(){ playSong(btn.getAttribute('data-song')); });
   });
 
-  renderSong('loved');
+  playerPlay.addEventListener('click', function(){
+    if(!playerAudio.paused){ playerAudio.pause(); return; }
+    if(!playerAudio.currentSrc){ playSong(currentSongKey); return; }
+    playerAudio.play().catch(function(){});
+  });
+  playerPrev.addEventListener('click', function(){ stepSong(-1); });
+  playerNext.addEventListener('click', function(){ stepSong(1); });
+
+  playerAudio.addEventListener('play', function(){ playerPlay.textContent = '⏸'; });
+  playerAudio.addEventListener('pause', function(){ playerPlay.textContent = '▶'; });
+  playerAudio.addEventListener('ended', function(){ stepSong(1); });
+  playerAudio.addEventListener('timeupdate', function(){
+    if(playerAudio.duration){
+      playerProgressFill.style.width = (playerAudio.currentTime / playerAudio.duration * 100) + '%';
+    }
+  });
+
+  updatePlayerDisplay('loved');
 })();
 </script>
 </body>
