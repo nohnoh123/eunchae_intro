@@ -46,7 +46,7 @@ a,button,.menu-item,.tab,.menu-item2,.skip-btn,.item-slot,.modal-close{
 }
 #skyline-bg{
   position:fixed; inset:0; width:100%; height:100%; z-index:-2;
-  background:url('ground.jpg') center center/cover no-repeat;
+  background:url('ground2.gif') 35% center/cover no-repeat;
   image-rendering:pixelated;
 }
 
@@ -71,7 +71,7 @@ a,button,.menu-item,.tab,.menu-item2,.skip-btn,.item-slot,.modal-close{
   100%{opacity:0; transform:scale(1.18);}
 }
 .skip-btn{
-  position:absolute; top:22px; right:80px;
+  position:absolute; top:22px; right:18px;
   background:var(--white); border:3px solid var(--line);
   padding:7px 14px; font-size:11px; color:var(--ink); font-family:inherit;
   z-index:5;
@@ -79,7 +79,7 @@ a,button,.menu-item,.tab,.menu-item2,.skip-btn,.item-slot,.modal-close{
 
 /* ---------- bgm toggle ---------- */
 .bgm-btn{
-  position:fixed; top:18px; right:18px; z-index:60;
+  position:fixed; top:70px; right:18px; z-index:60;
   width:38px; height:38px; display:flex; align-items:center; justify-content:center;
   background:var(--white); border:3px solid var(--line); border-radius:50%;
   font-size:15px; font-family:inherit; color:var(--ink);
@@ -274,6 +274,15 @@ a,button,.menu-item,.tab,.menu-item2,.skip-btn,.item-slot,.modal-close{
 .modal-img-group .modal-img{ width:130px; height:130px; }
 .modal-desc{ font-size:12px; line-height:1.9; color:var(--ink); white-space:pre-line; }
 
+/* ---------- bgm notice ---------- */
+#bgmNotice{ z-index:1001; }
+.notice-body{ padding:28px 24px 26px; }
+.notice-text{ font-size:12px; line-height:2; color:var(--ink); }
+.notice-ok-btn{
+  font-family:inherit; font-size:12px; padding:10px 22px;
+  background:var(--console-dk); color:var(--white); border:3px solid var(--line);
+}
+
 /* ---------- playlist player ---------- */
 .playlist-tabs{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:22px; }
 .playlist-tab-btn{
@@ -316,12 +325,14 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
   .console{ width:260px; }
   .quest-list{ grid-template-columns:repeat(2,minmax(0,150px)); gap:10px; }
 }
+
 </style>
 </head>
 <body class="no-scroll">
 <div id="skyline-bg"></div>
 <div id="crt"></div>
 <audio id="bgm" src="BGM2.mp3" loop preload="none"></audio>
+<audio id="typeSfx" src="keyboard.mp3" loop preload="none"></audio>
 <button type="button" class="bgm-btn" id="bgmBtn" aria-label="배경음악 켜기/끄기">🔊</button>
 
 <div id="boot">
@@ -393,9 +404,9 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
       <div class="status-body">
         <div class="avatar pixel-frame"><img src = "proflie_image.jpg" alt="노은채"></div>
         <div class="status-info">
-          <p class="stat-line">이름: <span>노은채</span></p>
-          <p class="stat-line">생년월일: <span>2004.03.20(23살)</span></p>
-          <p class="stat-line">전공: <span>단국대학교 소프트웨어학과 3학년 재학</span></p>
+          <p class="stat-line">이름: <span id="nameValue"></span></p>
+          <p class="stat-line">생년월일: <span id="birthValue"></span></p>
+          <p class="stat-line">전공: <span id="majorValue"></span></p>
           <div class="typewriter" id="introText"></div>
         </div>
       </div>
@@ -471,6 +482,16 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
 
 </div>
 
+<div class="modal-overlay" id="bgmNotice">
+  <div class="pixel-frame modal-box">
+    <div class="dialog-header pink-header">🎵 BGM ON</div>
+    <div class="modal-body notice-body">
+      <p class="notice-text">이 사이트엔 배경음악이 깔려있어요!<br>함께 즐겨주시면 좋겠어요 🎶</p>
+      <button type="button" class="notice-ok-btn" id="bgmNoticeOk">확인했어요!</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="itemModal">
   <div class="pixel-frame modal-box">
     <button type="button" class="modal-close" id="modalClose">✕</button>
@@ -492,16 +513,51 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
   var skipBtn = document.getElementById('skipBtn');
   var bgm = document.getElementById('bgm');
   var bgmBtn = document.getElementById('bgmBtn');
+  var typeSfx = document.getElementById('typeSfx');
   var activeIndex = 0;
   var ready = false;
   var launched = false;
   var bgmMuted = false;
 
   bgm.volume = 0.4;
+  typeSfx.volume = 0.5;
+
+  // ---- low-latency click sound (Web Audio API, decoded once up front) ----
+  var AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+  var audioCtx = AudioCtxClass ? new AudioCtxClass() : null;
+  var clickBuffer = null;
+  var clickGain = null;
+  if(audioCtx){
+    clickGain = audioCtx.createGain();
+    clickGain.gain.value = 0.6;
+    clickGain.connect(audioCtx.destination);
+    fetch('click.mp3')
+      .then(function(res){ return res.arrayBuffer(); })
+      .then(function(buf){ return audioCtx.decodeAudioData(buf); })
+      .then(function(decoded){ clickBuffer = decoded; })
+      .catch(function(){});
+  }
+
+  document.addEventListener('click', function(e){
+    var target = e.target.closest('button, a, .menu-item');
+    if(!target || !audioCtx || !clickBuffer) return;
+    if(audioCtx.state === 'suspended'){ audioCtx.resume(); }
+    var src = audioCtx.createBufferSource();
+    src.buffer = clickBuffer;
+    src.connect(clickGain);
+    src.start(0);
+  });
 
   function playBgm(){
     if(bgmMuted) return;
     bgm.play().catch(function(){});
+  }
+
+  function primeTypeSfx(){
+    typeSfx.play().then(function(){
+      typeSfx.pause();
+      typeSfx.currentTime = 0;
+    }).catch(function(){});
   }
 
   bgmBtn.addEventListener('click', function(){
@@ -522,11 +578,12 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
     setTimeout(function(){ exitToast.classList.remove('show'); }, 1400);
   }
 
-  function startSite(){
+  function enterSite(){
     if(launched) return;
     launched = true;
     boot.classList.add('boot-out');
     playBgm();
+    primeTypeSfx();
     setTimeout(function(){
       boot.style.display = 'none';
       document.body.classList.remove('no-scroll');
@@ -535,6 +592,21 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
       updateProgress('status');
     }, 620);
   }
+
+  var bgmNotice = document.getElementById('bgmNotice');
+  var bgmNoticeOk = document.getElementById('bgmNoticeOk');
+  var noticeShown = false;
+
+  function startSite(){
+    if(launched || noticeShown) return;
+    noticeShown = true;
+    bgmNotice.classList.add('show');
+  }
+
+  bgmNoticeOk.addEventListener('click', function(){
+    bgmNotice.classList.remove('show');
+    enterSite();
+  });
 
   menuItems.forEach(function(item, i){
     item.addEventListener('click', function(){
@@ -609,23 +681,47 @@ footer{ text-align:center; font-size:10px; color:var(--console-dk); padding:30px
   }, 2100);
 
   function typeIntro(){
-    var el = document.getElementById('introText');
-    if(!el || el.getAttribute('data-typed')) return;
-    el.setAttribute('data-typed','1');
-    var text = "안녕하세요 소프트웨어전공 노은채입니다. 남은 시간 동안 같이 많은 것을 배워가는 시간이었으면 좋겠습니다. \n모두 좋은 하루 보내시길 바라겠습니다. 잘 부탁드립니다!";
-    var i = 0;
-    var caret = document.createElement('span');
-    caret.className = 'caret';
-    caret.textContent = '▌';
-    el.appendChild(caret);
-    function step(){
-      if(i < text.length){
-        caret.insertAdjacentText('beforebegin', text[i]);
-        i++;
-        setTimeout(step, 70);
+    var nameEl = document.getElementById('nameValue');
+    if(!nameEl || nameEl.getAttribute('data-typed')) return;
+    nameEl.setAttribute('data-typed','1');
+
+    var queue = [
+      { el: nameEl, text: '노은채' },
+      { el: document.getElementById('birthValue'), text: '2004.03.20(23살)' },
+      { el: document.getElementById('majorValue'), text: '단국대학교 소프트웨어학과 3학년 재학' },
+      { el: document.getElementById('introText'), text: "안녕하세요 소프트웨어전공 노은채입니다. 남은 시간 동안 같이 많은 것을 배워가는 시간이었으면 좋겠습니다. \n모두 좋은 하루 보내시길 바라겠습니다. 잘 부탁드립니다!" }
+    ];
+
+    typeSfx.currentTime = 0;
+    typeSfx.play().catch(function(){});
+
+    var qi = 0;
+    function nextField(){
+      if(qi >= queue.length){
+        typeSfx.pause();
+        typeSfx.currentTime = 0;
+        return;
       }
+      var item = queue[qi];
+      var i = 0;
+      var caret = document.createElement('span');
+      caret.className = 'caret';
+      caret.textContent = '▌';
+      item.el.appendChild(caret);
+      function step(){
+        if(i < item.text.length){
+          caret.insertAdjacentText('beforebegin', item.text[i]);
+          i++;
+          setTimeout(step, 70);
+        } else {
+          caret.remove();
+          qi++;
+          setTimeout(nextField, 200);
+        }
+      }
+      step();
     }
-    step();
+    nextField();
   }
 
   // ---- item detail modal ----
